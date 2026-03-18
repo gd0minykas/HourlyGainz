@@ -39,19 +39,6 @@ A lightweight Windows console app that reminds you to complete an activity
 
 ---
 
-## 📦 Build a Standalone Executable
-
-```
-dotnet publish HourlyGainz.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
-```
-
-The `.exe` will be in:
-```
-bin\Release\net10.0-windows10.0.17763.0\win-x64\publish\HourlyGainz.exe
-```
-
----
-
 ## 📋 Notes
 
 - Toast Notifications require Windows 10 version 1607 or later.
