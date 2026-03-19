@@ -1,5 +1,7 @@
 using System.Runtime.InteropServices;
-using Microsoft.Toolkit.Uwp.Notifications;
+using Windows.Data.Xml.Dom;
+using Windows.UI.Notifications;
+
 
 var cts = new CancellationTokenSource();
 
@@ -11,6 +13,7 @@ ConsoleCtrlHandler ctrlHandler = _ =>
 
 // Register handler for: Alt+F4, window X button, logoff, shutdown for Cleanup to run
 NativeMethods.SetConsoleCtrlHandler(ctrlHandler, true);
+RegisterAppForToasts();
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
@@ -23,16 +26,16 @@ Console.CancelKeyPress += (_, e) =>
 
 Console.ForegroundColor = ConsoleColor.Cyan;
 Console.WriteLine("╔══════════════════════════════════════╗");
-Console.WriteLine("║           HourlyGainz 💪             ║");
+Console.WriteLine("║         HourlyGainz 💪               ║");
 Console.WriteLine("╚══════════════════════════════════════╝");
 Console.ResetColor();
 Console.WriteLine();
 
 int totalMinutes = 0;
+
 while (true)
 {
-    Console.Write("⏱  Enter reminder interval (in minutes): ");
-
+    Console.Write("⏱ Enter reminder interval (in minutes): ");
     if (int.TryParse(Console.ReadLine(), out totalMinutes) && totalMinutes > 0)
     {
         // Debugging
@@ -44,21 +47,24 @@ while (true)
 
         break;
     }
-    Console.ForegroundColor = ConsoleColor.Red;
 
-    Console.WriteLine("   Please enter a valid positive number.");
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine("  Please enter a valid positive number.");
     Console.ResetColor();
 }
 
 string activity = "";
+
 while (true)
 {
     Console.Write("🏃 Enter the activity to be reminded of: ");
     activity = Console.ReadLine()?.Trim() ?? "";
+
     if (!string.IsNullOrWhiteSpace(activity))
         break;
+
     Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine("   Activity cannot be empty.");
+    Console.WriteLine("  Activity cannot be empty.");
     Console.ResetColor();
 }
 
@@ -88,6 +94,7 @@ try
         if (cts.Token.IsCancellationRequested) break;
 
         reminderCount++;
+
         Console.WriteLine();
         Console.ForegroundColor = ConsoleColor.Magenta;
         Console.WriteLine($"\n🔔 [{DateTime.Now:HH:mm:ss}] Reminder #{reminderCount}: Time to \"{activity}\"!");
@@ -109,21 +116,42 @@ finally
 
 void Cleanup()
 {
-    ToastNotificationManagerCompat.Uninstall();
     if (!cts.IsCancellationRequested) cts.Cancel();
     cts.Dispose();
+}
+
+void RegisterAppForToasts()
+{
+    string exeDir = AppContext.BaseDirectory;
+    string iconPath = Path.Combine(exeDir, "icon.ico");
+
+    string regPath = @"SOFTWARE\Classes\AppUserModelId\HourlyGainz";
+    using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(regPath);
+    key.SetValue("DisplayName", "HourlyGainz");
+    key.SetValue("IconUri", iconPath);
 }
 
 void SendToastNotification(string act, int count)
 {
     try
     {
-        var builder = new ToastContentBuilder();
-        builder
-            .AddText($"💪 HourlyGainz — Reminder #{count}")
-            .AddText($"Time to do: {act}")
-            .AddText("Get up and crush it!")
-            .Show();
+        string xml = $"""
+            <toast>
+              <visual>
+                <binding template="ToastGeneric">
+                  <text>💪 HourlyGainz — Reminder #{count}</text>
+                  <text>Time to do: {System.Security.SecurityElement.Escape(act)}</text>
+                  <text>Get up and crush it!</text>
+                </binding>
+              </visual>
+            </toast>
+            """;
+
+        var doc = new XmlDocument();
+        doc.LoadXml(xml);
+
+        var toast = new ToastNotification(doc);
+        ToastNotificationManager.CreateToastNotifier("HourlyGainz").Show(toast);
     }
     catch (Exception ex)
     {
