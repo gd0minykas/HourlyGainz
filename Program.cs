@@ -2,7 +2,6 @@ using System.Runtime.InteropServices;
 using Windows.Data.Xml.Dom;
 using Windows.UI.Notifications;
 
-
 var cts = new CancellationTokenSource();
 
 ConsoleCtrlHandler ctrlHandler = _ =>
@@ -33,6 +32,7 @@ Console.WriteLine();
 
 int totalMinutes = 0;
 
+// Setup loop for valid reminder interval input
 while (true)
 {
     Console.Write("⏱ Enter reminder interval (in minutes): ");
@@ -42,6 +42,7 @@ while (true)
         if (totalMinutes == 6969)
         {
             SendToastNotification("test", 1);
+            Cleanup();
             return;
         }
 
@@ -70,8 +71,8 @@ while (true)
 
 Console.WriteLine();
 Console.ForegroundColor = ConsoleColor.Green;
-Console.WriteLine($"✅ Reminder set! Every {totalMinutes} min → \"{activity}\"");
-Console.WriteLine("   Press Ctrl+C, Alt+F4, or close the window to stop.");
+Console.WriteLine($"✅ Reminder set! Every {totalMinutes} min → \"{activity}\"\n");
+Console.WriteLine("Press Ctrl+C, Alt+F4, or close the window to stop.\n");
 Console.ResetColor();
 Console.WriteLine();
 
@@ -107,15 +108,16 @@ try
 }
 finally
 {
-    Console.WriteLine();
-    Console.ForegroundColor = ConsoleColor.Yellow;
-    Console.WriteLine($"\n👋 HourlyGainz stopped. {(reminderCount > 0 ? "Great work today!" : "")}");
-    Console.ResetColor();
-    Cleanup();
+    Cleanup(reminderCount);
 }
 
-void Cleanup()
+void Cleanup(int _reminderCount = 0)
 {
+    Console.WriteLine();
+    Console.ForegroundColor = ConsoleColor.Yellow;
+    Console.WriteLine($"\n👋 HourlyGainz stopped. {(_reminderCount > 0 ? "Great work today!" : "")}");
+    Console.ResetColor();
+
     if (!cts.IsCancellationRequested) cts.Cancel();
     cts.Dispose();
 }
@@ -128,7 +130,6 @@ void RegisterAppForToasts()
     string regPath = @"SOFTWARE\Classes\AppUserModelId\HourlyGainz";
     using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(regPath);
     key.SetValue("DisplayName", "HourlyGainz");
-    key.SetValue("IconUri", iconPath);
 }
 
 void SendToastNotification(string act, int count)
