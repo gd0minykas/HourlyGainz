@@ -12,6 +12,11 @@ A lightweight Windows console app that reminds you to complete an activity
 
 ---
 
+## ⬇️ Download
+Grab the latest HourlyGainz.exe from the [Releases](https://github.com/gd0minykas/HourlyGainz/releases) page — no installation needed.
+
+---
+
 ## 🚀 How to Run
 
 1. Open a Latest Release of `HourlyGainz` and Download the `HourlyGainz.exe`.
