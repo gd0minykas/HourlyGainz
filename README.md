@@ -14,17 +14,10 @@ A lightweight Windows console app that reminds you to complete an activity
 
 ## 🚀 How to Run
 
-1. Open a terminal in the `HourlyGainz` folder.
-
-2. Restore dependencies:
-   ```
-   dotnet restore HourlyGainz.csproj
-   ```
+1. Open a Latest Release of `HourlyGainz` and Download the `HourlyGainz.exe`.
 
 3. Run the app:
-   ```
-   dotnet run --project HourlyGainz.csproj
-   ```
+   `HourlyGainz.exe`
 
 4. Follow the prompts:
    ```
